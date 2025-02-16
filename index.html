@@ -53,6 +53,48 @@
             margin-top: 10px;
             font-size: 18px;
         }
+
+        #controls {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .control-btn {
+            padding: 15px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .control-btn:active {
+            background-color: #45a049;
+        }
+
+        #up-btn {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        #left-btn {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        #down-btn {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        #right-btn {
+            grid-column: 3;
+            grid-row: 2;
+        }
     </style>
 </head>
 <body>
@@ -62,11 +104,19 @@
         <div id="red-cube" class="cube"></div>
     </div>
     <div id="timer">زمان: 0 ثانیه</div>
+    <div id="controls">
+        <button id="up-btn" class="control-btn">↑</button>
+        <button id="left-btn" class="control-btn">←</button>
+        <button id="down-btn" class="control-btn">↓</button>
+        <button id="right-btn" class="control-btn">→</button>
+    </div>
 
     <script>
         let currentLevel = 1;
         let startTime;
         let timerInterval;
+        let blueCubeX = 0;
+        let blueCubeY = 0;
         const cubeSizePercent = 10; // 10% of container
         const levels = [
             { obstacles: [] }, // مرحله ۱: بدون مانع
@@ -166,45 +216,11 @@
             }
         }
 
-        // افزودن کنترل‌های لمسی
-        document.addEventListener('touchstart', handleTouchStart, false);        
-        document.addEventListener('touchmove', handleTouchMove, false);
-
-        let xDown = null;                                                        
-        let yDown = null;
-
-        function handleTouchStart(evt) {                                         
-            xDown = evt.touches[0].clientX;                                      
-            yDown = evt.touches[0].clientY;                                      
-        };                                                
-
-        function handleTouchMove(evt) {
-            if (!xDown || !yDown) {
-                return;
-            }
-
-            let xUp = evt.touches[0].clientX;                                    
-            let yUp = evt.touches[0].clientY;
-
-            let xDiff = xDown - xUp;
-            let yDiff = yDown - yUp;
-
-            if (Math.abs(xDiff) > Math.abs(yDiff)) {
-                if (xDiff > 0) {
-                    moveCube('left');
-                } else {
-                    moveCube('right');
-                }                       
-            } else {
-                if (yDiff > 0) {
-                    moveCube('up');
-                } else { 
-                    moveCube('down');
-                }                                                                 
-            }
-            xDown = null;
-            yDown = null;                                             
-        };
+        // افزودن کنترل‌های دکمه‌ها
+        document.getElementById('up-btn').addEventListener('click', () => moveCube('up'));
+        document.getElementById('down-btn').addEventListener('click', () => moveCube('down'));
+        document.getElementById('left-btn').addEventListener('click', () => moveCube('left'));
+        document.getElementById('right-btn').addEventListener('click', () => moveCube('right'));
 
         initializeGame();
     </script>
