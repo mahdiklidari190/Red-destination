@@ -122,7 +122,8 @@
             { obstacles: [] }, // مرحله ۱: بدون مانع
             { obstacles: [{ x: 30, y: 30, width: 40, height: 10 }] }, // مرحله ۲: یک مانع
             { obstacles: [{ x: 20, y: 60, width: 60, height: 10 }, { x: 50, y: 20, width: 10, height: 40 }] }, // مرحله ۳: دو مانع
-            // افزودن مراحل بیشتر با موانع پیچیده‌تر
+            { obstacles: [{ x: 0, y: 20, width: 80, height: 10 }, { x: 20, y: 40, width: 60, height: 10 }, { x: 40, y: 60, width: 40, height: 10 }] }, // مرحله ۴: هزارتو ساده
+            { obstacles: [{ x: 0, y: 10, width: 90, height: 10 }, { x: 10, y: 30, width: 80, height: 10 }, { x: 20, y: 50, width: 70, height: 10 }, { x: 30, y: 70, width: 60, height: 10 }] }, // مرحله ۵: هزارتو پیچیده
         ];
 
         function initializeGame() {
@@ -217,10 +218,22 @@
         }
 
         // افزودن کنترل‌های دکمه‌ها
-        document.getElementById('up-btn').addEventListener('click', () => moveCube('up'));
-        document.getElementById('down-btn').addEventListener('click', () => moveCube('down'));
-        document.getElementById('left-btn').addEventListener('click', () => moveCube('left'));
-        document.getElementById('right-btn').addEventListener('click', () => moveCube('right'));
+        const buttons = {
+            'up': document.getElementById('up-btn'),
+            'down': document.getElementById('down-btn'),
+            'left': document.getElementById('left-btn'),
+            'right': document.getElementById('right-btn')
+        };
+
+        Object.keys(buttons).forEach(direction => {
+            let interval;
+            buttons[direction].addEventListener('mousedown', () => {
+                moveCube(direction);
+                interval = setInterval(() => moveCube(direction), 100);
+            });
+            buttons[direction].addEventListener('mouseup', () => clearInterval(interval));
+            buttons[direction].addEventListener('mouseleave', () => clearInterval(interval));
+        });
 
         initializeGame();
     </script>
