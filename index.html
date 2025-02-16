@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی مکعب آبی و قرمز - نسخه حرفه‌ای</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 2px solid #000;
+            background-color: #fff;
+        }
+
+        .cube {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+        }
+
+        #blue-cube {
+            background-color: blue;
+            top: 0;
+            left: 0;
+        }
+
+        #red-cube {
+            background-color: red;
+            bottom: 0;
+            right: 0;
+        }
+
+        .obstacle {
+            position: absolute;
+            background-color: black;
+        }
+
+        #controls {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        #timer {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>بازی مکعب آبی و قرمز</h1>
+    <div id="game-container">
+        <div id="blue-cube" class="cube"></div>
+        <div id="red-cube" class="cube"></div>
+    </div>
+    <div id="timer">زمان: 0 ثانیه</div>
+    <div id="controls">
+        <button onclick="resetGame()">شروع مجدد</button>
+        <button onclick="nextLevel()">مرحله بعدی</button>
+    </div>
+
+    <script>
+        let currentLevel = 1;
+        let startTime;
+        let timerInterval;
+        const cubeSize = 30;
+        const containerSize = 300;
+        let blueCubeX = 0;
+        let blueCubeY = 0;
+        const levels = [
+            { obstacles: [] },
+            { obstacles: [{ x: 100, y: 100, width: 100, height: 20 }] },
+            { obstacles: [{ x: 50, y: 150, width: 200, height: 20 }, { x: 100, y: 50, width: 20, height: 100 }] },
+        ];
+
+        function initializeGame() {
+            const gameContainer = document.getElementById('game-container');
+            gameContainer.innerHTML = `
+                <div id="blue-cube" class="cube"></div>
+                <div id="red-cube" class="cube"></div>
+            `;
+            const level = levels[currentLevel - 1];
+            level.obstacles.forEach(obstacle => {
+                const obstacleElement = document.createElement('div');
+                obstacleElement.className = 'obstacle';
+                obstacleElement.style.left = `${obstacle.x}px`;
+                obstacleElement.style.top = `${obstacle.y}px`;
+                obstacleElement.style.width = `${obstacle.width}px`;
+                obstacleElement.style.height = `${obstacle.height}px`;
+                gameContainer.appendChild(obstacleElement);
+            });
+            startTimer();
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('timer').innerText = `زمان: ${elapsedTime} ثانیه`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function moveCube(event) {
+            const key = event.key;
+            const step = 10;
+
+            switch (key) {
+                case 'ArrowUp':
+                    if (blueCubeY - step >= 0 && !checkCollision(blueCubeX, blueCubeY - step)) {
+                        blueCubeY -= step;
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (blueCubeY + step <= containerSize - cubeSize && !checkCollision(blueCubeX, blueCubeY + step)) {
+                        blueCubeY += step;
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (blueCubeX - step >= 0 && !checkCollision(blueCubeX - step, blueCubeY)) {
+                        blueCubeX -= step;
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (blueCubeX + step <= containerSize - cubeSize && !checkCollision(blueCubeX + step, blueCubeY)) {
+                        blueCubeX += step;
+                    }
+                    break;
+            }
+
+            const blueCube = document.getElementById('blue-cube');
+            blueCube.style.top = `${blueCubeY}px`;
+            blueCube.style.left = `${blueCubeX}px`;
+
+            if (checkWin()) {
+                stopTimer();
+                alert(`تبریک! شما مرحله ${currentLevel} را در ${Math.floor((Date.now() - startTime) / 1000)} ثانیه کامل کردید!`);
+                nextLevel();
+            }
+        }
+
+        function checkCollision(x, y) {
+            const level = levels[currentLevel - 1];
+            return level.obstacles.some(obstacle => {
+                return x < obstacle.x + obstacle.width &&
+                    x + cubeSize > obstacle.x &&
+                    y < obstacle.y + obstacle.height &&
+                    y + cubeSize > obstacle.y;
+            });
+        }
+
+        function checkWin() {
+            const blueCube = document.getElementById('blue-cube');
+            const redCube = document.getElementById('red-cube');
+            const blueRect = blueCube.getBoundingClientRect();
+            const redRect = redCube.getBoundingClientRect();
+
+            return blueRect.left < redRect.right &&
+                blueRect.right > redRect.left &&
+                blueRect.top < redRect.bottom &&
+                blueRect.bottom > redRect.top;
+        }
+
+        function resetGame() {
+            stopTimer();
+            blueCubeX = 0;
+            blueCubeY = 0;
+            initializeGame();
+            const blueCube = document.getElementById('blue-cube');
+            blueCube.style.top = `${blueCubeY}px`;
+            blueCube.style.left = `${blueCubeX}px`;
+            startTimer();
+        }
+
+        function nextLevel() {
+            if (currentLevel < levels.length) {
+                currentLevel++;
+                resetGame();
+            } else {
+                alert('شما همه مراحل را کامل کردید!');
+                currentLevel = 1;
+                resetGame();
+            }
+        }
+
+        document.addEventListener('keydown', moveCube);
+        initializeGame();
+    </script>
+</body>
+</html>
